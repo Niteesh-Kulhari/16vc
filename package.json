@@ -1,0 +1,30 @@
+{
+  "name": "16vc",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u00001\u00006\u0000v\u0000c\u0000\r\u0000 \u0000",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Niteesh-Kulhari/16vc.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Niteesh-Kulhari/16vc/issues"
+  },
+  "homepage": "https://github.com/Niteesh-Kulhari/16vc#readme",
+  "dependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.10",
+    "express": "^4.21.2",
+    "typescript": "^5.7.3",
+    "zod": "^3.24.1"
+  }
+}
