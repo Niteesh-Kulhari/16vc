@@ -20,6 +20,12 @@ export const itemSchema = z.object({
     .optional(),
 });
 
+export const returnSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  startDate: z.string().refine((date) => !isNaN(Date.parse(date)), "Invalid start Date"),
+  endDate: z.string().refine((date) => !isNaN(Date.parse(date)), "Invalid end Date")
+})
+
 export const rentSchema = z.object({
   name: z.string(),
   startDate: z.string().refine((date) => !isNaN(Date.parse(date)), {
