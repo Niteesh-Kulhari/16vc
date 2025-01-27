@@ -1,5 +1,5 @@
 import express from "express"
-import { getItems, listItem, rentItems, searchItems } from "../controller/item.controller";
+import { getItems, listItem, rentItems, returnItems, searchItems } from "../controller/item.controller";
 
 
 const router = express.Router();
@@ -17,7 +17,7 @@ router.post("/rent", rentItems)
 //******
 //* Route to rent item 
 //******
-router.post("/return", rentItems)
+router.post("/return", returnItems)
 
 //******
 //* Route to get all the items 

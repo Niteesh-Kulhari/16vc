@@ -11,35 +11,38 @@ import { items } from "../db/items.db";
 // Function to add the item into our in memory database
 //  */
 export const listItem = (req: Request, res: Response) => {
-  const { name, description, pricePerDay } = req.body;
+  try {
+    const { name, description, pricePerDay } = req.body;
 
-  const newItem = itemSchema.omit({ id: true }).parse(req.body);
+    const newItem = itemSchema.omit({ id: true }).parse(req.body);
 
-  const itemWithId = {
-    ...newItem,
-    rentalDate: [],
-    id: items.length + 1,
-  };
+    const itemWithId = {
+      ...newItem,
+      rentalDates: [],
+      id: items.length + 1,
+    };
 
-  // const newItem: Item = {
-  //     id: items.length + 1,
-  //     name,
-  //     description,
-  //     pricePerDay,
-  //     availability: true,
-  //     rentalDates: [],
-  // };
-
-  items.push(itemWithId);
-  res.status(201).json(itemWithId);
+    items.push(itemWithId);
+    res.status(201).json(itemWithId);
+  } catch (error) {
+    res.status(500).json({ message: "An error occurred", error: error });
+  }
 };
 
 //*******
 // Function to get all the items stored in our database
 //  */
 
-export const getItems = (req: Request, res: Response) => {
-  res.status(200).json(items);
+export const getItems = (req: Request, res: Response): void => {
+  try {
+    if (items.length === 0) {
+      res.status(200).json({ message: "No items to display" });
+      return;
+    }
+    res.status(200).json(items);
+  } catch (error) {
+    res.status(500).json({ message: "Unexpected error occured" });
+  }
 };
 
 //*********
@@ -50,7 +53,7 @@ export const rentItems = (req: Request, res: Response): void => {
   try {
     const { name, startDate, endDate } = rentSchema.parse(req.body);
 
-    const item = items.find((i) => i.name === name);
+    const item = items.find((i) => i.name.toLowerCase() === name.toLowerCase());
 
     if (!item) {
       res.status(404).json({ message: "Item Not Found" });
@@ -60,8 +63,9 @@ export const rentItems = (req: Request, res: Response): void => {
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    if (start > end) {
+    if (start >= end) {
       res.status(400).json({ message: "Start date must be befor End date" });
+      return;
     }
 
     if (!item.rentalDates || item.rentalDates.length === 0) {
@@ -84,7 +88,7 @@ export const rentItems = (req: Request, res: Response): void => {
     item.rentalDates.push({ start: startDate, end: endDate });
     res.status(201).json({ message: "Rented Successfully", item });
   } catch (error) {
-    res.status(500).json({ message: "An unexpected error occured" });
+   res.status(400).json({ message: "Invalid input data", error: error });
   }
 };
 
@@ -155,23 +159,26 @@ export const returnItems = (req: Request, res: Response) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    if (start > end) {
+    if (start >= end) {
       res
         .status(400)
         .json({ message: "Start date should be less than End date" });
+      return;
     }
 
-    const rentIndex = item.rentalDates?.findIndex(
-      (rental) => {
-         rental.start === startDate  &&
-         rental.end === endDate
-      }
-    )
+    const rentIndex =
+      item.rentalDates?.findIndex(
+        (rental) => rental.start === startDate && rental.end === endDate
+      ) ?? -1;
 
-    if(rentIndex === -1){
-      res.status(400).json({message: "Rental not found"})
+    if (rentIndex === -1) {
+      res.status(400).json({ message: "Rental not found" });
+      return;
     }
+
+    item.rentalDates?.splice(rentIndex, 1);
+    res.status(200).json({ message: "Return Successfull", item });
   } catch (error) {
-    res.status(500).json({ message: "Unexpected Error occured" });
+   res.status(400).json({ message: "Invalid input data", error: error});
   }
 };
