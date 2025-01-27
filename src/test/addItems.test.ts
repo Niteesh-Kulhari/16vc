@@ -98,6 +98,14 @@ describe("API Integration Tests", () => {
 
         expect(response7.body.message).toBe("Invalid input data")
 
+        const response14 = await request(app).post("/api/items/rent").send({
+            name: "Camera",
+            startDate: "2025-25-01", // Invalid format
+            endDate: "2025-01-26",
+          });
+          
+          expect(response14.body.message).toBe("Invalid input data");
+        
         //***
         // Test Call to rent the camera with wrong inputs
         // wrong dates
@@ -143,8 +151,9 @@ describe("API Integration Tests", () => {
         expect(response11.status).toBe(404)
         expect(response11.body.message).toBe("No items found")
 
+        
         //***
-        // Test call to search items based on minPrice
+        // Test call to return items
         //  */
 
         const response12 = await request(app).post("/api/items/return").send({
@@ -157,7 +166,7 @@ describe("API Integration Tests", () => {
         expect(response12.body.message).toBe("Item Not Found")
 
         //***
-        // Test call to search items based on minPrice
+        // Test call to return item
         //  */
 
         const response13 = await request(app).post("/api/items/return").send({
@@ -165,9 +174,23 @@ describe("API Integration Tests", () => {
             startDate: "01-20-2025",
             endDate: "01-22-2025"
         })
-        console.log(response13.body)
+        //console.log(response13.body)
         expect(response13.status).toBe(200)
         expect(response13.body.message).toBe("Return Successfull")
-        expect(response13.body.item.name).toBe("Camera") 
+        expect(response13.body.item.name).toBe("Camera")
+
+        //***
+        // Returning the item again
+        //  */
+        const response15 = await request(app).post("/api/items/return").send({
+            name: "Camera",
+            startDate: "01-20-2025",
+            endDate: "01-22-2025"
+        })
+        //console.log(response15.body)
+        expect(response15.status).toBe(400)
+        expect(response15.body.message).toBe("Rental not found")
+
+        
     });
 });

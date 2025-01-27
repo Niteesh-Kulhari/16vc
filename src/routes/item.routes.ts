@@ -10,12 +10,12 @@ const router = express.Router();
 router.post("/", listItem)
 
 //******
-//* Route to rent item 
+//* Route to rent an item 
 //******
 router.post("/rent", rentItems)
 
 //******
-//* Route to rent item 
+//* Route to return a rented item 
 //******
 router.post("/return", returnItems)
 
