@@ -14,6 +14,14 @@ export const listItem = (req: Request, res: Response) => {
   try {
     const { name, description, pricePerDay } = req.body;
 
+    const duplicate = items.find(
+      (item) => item.name.toLowerCase() === name.toLowerCase()
+    );
+    if (duplicate) {
+      res.status(400).json({ message: "Item already exists" });
+      return;
+    }
+
     const newItem = itemSchema.omit({ id: true }).parse(req.body);
 
     const itemWithId = {
@@ -64,7 +72,7 @@ export const rentItems = (req: Request, res: Response): void => {
     const end = new Date(endDate);
 
     if (start >= end) {
-      res.status(400).json({ message: "Start date must be befor End date" });
+      res.status(400).json({ message: "Start date must be before End date" });
       return;
     }
 
@@ -88,7 +96,7 @@ export const rentItems = (req: Request, res: Response): void => {
     item.rentalDates.push({ start: startDate, end: endDate });
     res.status(201).json({ message: "Rented Successfully", item });
   } catch (error) {
-   res.status(400).json({ message: "Invalid input data", error: error });
+    res.status(400).json({ message: "Invalid input data", error: error });
   }
 };
 
@@ -127,14 +135,14 @@ export const searchItems = (req: Request, res: Response) => {
       filteredMax.forEach((item) => filteredItems.add(item));
     }
 
-    const array = Array.from(filteredItems);
+    const resultArray = Array.from(filteredItems);
 
-    if (array.length === 0) {
+    if (resultArray.length === 0) {
       res.status(404).json({ message: "No items found" });
       return;
     }
 
-    res.status(200).json({ message: "Items Found", array });
+    res.status(200).json({ message: "Items Found", resultArray });
   } catch (error) {
     res.status(500).json({ message: "Unexpected Error Occured" });
   }
@@ -179,6 +187,6 @@ export const returnItems = (req: Request, res: Response) => {
     item.rentalDates?.splice(rentIndex, 1);
     res.status(200).json({ message: "Return Successfull", item });
   } catch (error) {
-   res.status(400).json({ message: "Invalid input data", error: error});
+    res.status(400).json({ message: "Invalid input data", error: error });
   }
 };

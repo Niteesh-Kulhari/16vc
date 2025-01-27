@@ -27,7 +27,7 @@ export const returnSchema = z.object({
 })
 
 export const rentSchema = z.object({
-  name: z.string(),
+  name: z.string().min(1, "Name is required"),
   startDate: z.string().refine((date) => !isNaN(Date.parse(date)), {
     message: "Invalid Start Date",
   }),
