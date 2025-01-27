@@ -4,8 +4,10 @@ import {
   itemSchema,
   rentSchema,
   returnSchema,
+  searchSchema,
 } from "../models/item.model";
 import { items } from "../db/items.db";
+import { ZodError } from "zod";
 
 //*******
 // Function to add the item into our in memory database
@@ -96,7 +98,7 @@ export const rentItems = (req: Request, res: Response): void => {
     item.rentalDates.push({ start: startDate, end: endDate });
     res.status(201).json({ message: "Rented Successfully", item });
   } catch (error) {
-    res.status(400).json({ message: "Invalid input data", error: error });
+    res.status(400).json({ message: "Invalid input data", error: error});
   }
 };
 
@@ -106,7 +108,7 @@ export const rentItems = (req: Request, res: Response): void => {
 
 export const searchItems = (req: Request, res: Response) => {
   try {
-    const { name, minPrice, maxPrice } = req.body;
+    const { name, minPrice, maxPrice } = searchSchema.parse(req.body);
 
     if (!name && !minPrice && !maxPrice) {
       res.status(400).json({ message: "Invalid Inputs" });
@@ -123,16 +125,24 @@ export const searchItems = (req: Request, res: Response) => {
       filteredNames.forEach((item) => filteredItems.add(item));
     }
 
-    if (minPrice) {
-      const filteredMin = items.filter((item) => item.pricePerDay >= minPrice);
+    if (minPrice !== undefined && maxPrice !== undefined) {
+      const filteredByPriceRange = items.filter(
+        (item) =>
+          item.pricePerDay >= minPrice && item.pricePerDay <= maxPrice
+      );
+      filteredByPriceRange.forEach((item) => filteredItems.add(item));
+    } else {
+      
+      if (minPrice !== undefined) {
+        const filteredMin = items.filter((item) => item.pricePerDay >= minPrice);
+        filteredMin.forEach((item) => filteredItems.add(item));
+      }
 
-      filteredMin.forEach((item) => filteredItems.add(item));
-    }
-
-    if (maxPrice) {
-      const filteredMax = items.filter((item) => item.pricePerDay <= maxPrice);
-
-      filteredMax.forEach((item) => filteredItems.add(item));
+      
+      if (maxPrice !== undefined) {
+        const filteredMax = items.filter((item) => item.pricePerDay <= maxPrice);
+        filteredMax.forEach((item) => filteredItems.add(item));
+      }
     }
 
     const resultArray = Array.from(filteredItems);
@@ -144,6 +154,13 @@ export const searchItems = (req: Request, res: Response) => {
 
     res.status(200).json({ message: "Items Found", resultArray });
   } catch (error) {
+    if (error instanceof ZodError) {
+       res.status(400).json({
+        message: "Invalid input data",
+        details: error.errors,
+      });
+      return
+    }
     res.status(500).json({ message: "Unexpected Error Occured" });
   }
 };
